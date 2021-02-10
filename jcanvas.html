@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- 所谓的手册，一个也不好用，还不如以后自己做一个手册！ -->
+  <!-- 我才不想记熟悉，背代码，脑子根本不够用的，因为同时还做godot，建模学习，电音学习，教程 事情特别多-->
+  <meta charset="utf-8">
+  <title>Jcanvas学习</title>
+  <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jcanvas/21.0.1/min/jcanvas.min.js"> </script>
+</head>
+
+<body>
+  <h2 align="center">使用canvas绘制图像，可使用函数绘制，用于将草稿规范化</h2>
+  <canvas id="canvas" width="1280px" height="720px"></canvas>
+  <br>
+  <input accept="image/*" id="up_file" placeholder="上传文件" type="file">
+  <img style="display:none;" src="" alt="代上传的文件">
+  <br>
+  <input type="text" placeholder="x坐标"><br>
+  <input type="text" placeholder="y坐标">
+  <button>添加点</button>
+  <input placeholder="请输入函数表达式，只支持一次函数和二次函数！">
+  <button>对称！</button>
+  <p>对称就是对函数取相反数操作 比如f(x)=3x f(-x)这两个函数</p>
+  <h6> Copyright © 2020 小沙盒工作室&amp;128hh. </h6>
+  <p>关于我为什么做这个东西</p>
+  <p>其实已经有现成的函数图像编辑器了——https://www.desmos.com/calculator，但是，它是为数学设计的，而我这个是为画画，电子艺术设计的，侧重点不一样。
+    它那个是可以计算无理数的，还有其他数学公式，而我这个不能，是用来画画的。
+    虽然desmos也可以导入图像，但我觉得操作不方便，不能像画图软件一样锁定图层，所以我就自己开发。
+    导入图片并绘制在坐标系并不难，直接使用canvas就可以绘制。
+    Desmos可以通过列表的方式对自定义的点进行连线，但是用列表功能做的连线不能使用函数表达式，对它取相反数的操作，这就麻烦了。
+    为什么我要做取相反数这一步，因为，我这个是用来画对称图像的工具（不是数学用途，而是游戏，绘画，这类多媒体用途的。因为本人不擅长画画，就想画一半，另外一半用相反数实现。
+
+    其实这个想法是出自3d全能开源软件blender中的修改器的功能，只需要做一半的模型，另一半通过镜像修改器就能自动补全。
+    那么我就开始思考了，既然3d可以这么做，那么2d应该也可以这么做。
+
+    你问我，这不是多此一举吗，绘图软件可以做到，复杂后，再翻转即可。
+    但是我觉得，绘图软件一般是画的位图，参数是不可控制的，不想矢量图，可以控制，自由修改。
+    但我只是借用矢量图的思路，话出来的并不是矢量图，而是位图。但是在对草稿进行规范化和标准化的时候，做了一个参数可控的操作，非矢量图的绘画，参数是不可控的。
+
+    canvas画出来是位图。
+    而且html5跨平台（浏览器），一次编写，在有浏览器的地方就能运行。
+    所以单独开发windows,android,ios的软件，对于没有团队和资金的个人独立开发者（职高学生，成本太高，研发时间过长）
+
+
+    而且画完也能导出图片保存。
+  </p>
+  <p>
+    其实我就是想用技术偷个懒，用于帮助和辅助不擅长绘画的独立开发者，做出好看一点的图。
+    预计不会做上色功能，就是草稿上传，然后进行参数化规范化，导出线稿轮廓。
+    之后，再利用绘图软件上色即可。
+
+    而且矢量图软件，不一定所有的系统都好找这种软件。
+    像windows macos linux 此类软件比较多
+    而移动平台可能比较少
+
+    像比较普遍的简单绘图软件，基本上都能在移动平台上找得到，但要找一个功能强大，或者复杂一点的软件就不好找了。
+    krita是比较强大的开源绘图软件，但是目前还没有安卓版本，已经有安卓 pad（平板电脑的版本了）
+    主流平台还是 windows macos linux 3大平台
+    这也是我要做这个东西的原因
+  </p>
+  <p>访问小沙盒的其他作品</p>
+  <a href="https://github.com/little-game-and-simple-software/EasyAvgFrameWork" target="_blank">EasyAvgFramework</a>
+  <p>感谢jcanvas和jquery这样个开源库</p>
+  <script>
+    $(function() {
+      // NOTE: 绘制坐标轴 这里是平面直角坐标系 在图层的最底层
+      function draw_Lines()
+      {
+        // x轴线
+        $("canvas").drawLine({
+          strokeStyle: '#000',
+          strokeWidth: 2,
+
+          x1: 0,
+          y1: 720,
+          x2: 1280,
+          y2: 720,
+        })
+        //y 轴线
+        $("canvas").drawLine({
+          strokeStyle: '#000',
+          strokeWidth: 2,
+          x1: 0,
+          y1: 0,
+          x2: 0,
+          y2: 720,
+        })
+        //x轴线的竖线 绘制100次 并绘制对应的坐标数字
+        var startx=10
+        for(var i=0;i<60;i++)
+        {
+          $("canvas").drawLine(
+            {
+              strokeStyle:'#000',
+              strokeWidth: 2,
+              x1:startx,y1:720,
+              x2:startx,y2:715,
+            })
+          $("canvas").drawText(
+            {
+              strokeStyle: '#25a',
+              strokeWidth: 1,
+              x: startx,
+              y: 710,
+              fontSize: 10,
+              align: 'left',
+              text: String(startx),
+            })
+          startx+=40
+        }
+        //y轴线的竖线 绘制100次 并绘制对应的坐标数字
+        var a=5
+        for(var i=0;i<60;i++)
+        {
+          $("canvas").drawLine(
+            {
+              strokeStyle:'#000',
+              strokeWidth: 2,
+              x1:0,y1:a,
+              x2:10,y2:a,
+            })
+            $("canvas").drawText(
+              {
+                strokeStyle: '#25a',
+                strokeWidth: 1,
+                x: 20,
+                y: a,
+                fontSize: 10,
+                align: 'left',
+                text: a,
+              })
+            a+=40
+        }
+      }
+      draw_Lines()
+      // NOTE: 用于绘制用户上传的图像
+      function drawImage(in_x,in_y,in_scale)
+      {
+        $("canvas").drawImage({
+          source: $("img")[0],
+          x: in_x,
+          y: in_y,
+          scale:in_scale,
+        })
+      }
+      var up_load_file = $("#up_file")
+      var fileReader = new FileReader()
+      up_load_file.change(function() {
+        var file = this.files[0]
+        console.log(file)
+        var reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onload = function() {
+        $("img").attr('src', reader.result)
+        drawImage(450,450,0.5)
+          // base64 编码
+          // console.log(reader.result)
+
+        }
+      })
+
+    })
+  </script>
+</body>
+
+</html>
+<!-- // var a=$("#canvas")
+// console.log(a)
+//怎么画不满呢 ？？？？？？
+// $("canvas").drawRect(
+//   {
+//   fillStyle:'black',
+//   x:0,y:0,
+//   width:1480,
+//   height:720,
+//   fromCenter:false,
+//   }) -->
